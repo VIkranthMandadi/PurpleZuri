@@ -11,8 +11,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
-import { loadOrders } from '../../../orders/store/orders.actions';
+import { loadOrders, updateOrderStatus } from '../../../orders/store/orders.actions';
 import {
   selectAllOrders,
   selectOrdersLoading,
@@ -35,6 +37,8 @@ import { OrderDialogComponent } from '../order-dialog/order-dialog.component';
     MatProgressSpinnerModule,
     MatToolbarModule,
     MatChipsModule,
+    MatSelectModule,
+    MatFormFieldModule,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
@@ -45,6 +49,7 @@ export class AdminDashboardComponent implements OnInit {
   error$: Observable<string | null>;
 
   displayedColumns: string[] = ['customer_name', 'phone', 'fabric', 'status', 'created_at'];
+  statusOptions: OrderStatus[] = ['shopping', 'stitching', 'shipping', 'paid'];
 
   constructor(private store: Store, private dialog: MatDialog, private snackBar: MatSnackBar) {
     this.orders$ = this.store.select(selectAllOrders);
@@ -103,5 +108,9 @@ export class AdminDashboardComponent implements OnInit {
       month: 'short',
       day: 'numeric',
     });
+  }
+
+  onStatusChange(orderId: string, newStatus: OrderStatus): void {
+    this.store.dispatch(updateOrderStatus({ id: orderId, status: newStatus }));
   }
 }
