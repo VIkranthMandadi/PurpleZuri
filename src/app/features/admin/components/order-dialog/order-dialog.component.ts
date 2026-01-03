@@ -1,16 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,7 +43,9 @@ export class OrderDialogComponent implements OnInit {
     this.orderForm = this.fb.group({
       customer_name: ['', [Validators.required, Validators.minLength(2)]],
       phone: ['', [Validators.required, Validators.pattern(/^[\d\s\-\+\(\)]+$/)]],
+      email: ['', [Validators.required, Validators.email]],
       fabric: ['', [Validators.required, Validators.minLength(2)]],
+      notes: [''], // Optional field
     });
 
     this.loading$ = this.store.select(selectOrdersLoading);
@@ -77,7 +70,9 @@ export class OrderDialogComponent implements OnInit {
       const orderData: CreateOrderRequest = {
         customer_name: this.orderForm.value.customer_name,
         phone: this.orderForm.value.phone,
+        email: this.orderForm.value.email,
         fabric: this.orderForm.value.fabric,
+        notes: this.orderForm.value.notes || undefined,
         status: 'shopping',
       };
 
@@ -91,4 +86,3 @@ export class OrderDialogComponent implements OnInit {
     this.dialogRef.close(false);
   }
 }
-

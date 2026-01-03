@@ -65,6 +65,14 @@
   padding: 12px;
 }
 
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
 // Status column - reduce right padding
 .orders-table .mat-column-status {
   padding-right: 8px;

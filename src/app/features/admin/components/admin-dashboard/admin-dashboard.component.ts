@@ -22,6 +22,7 @@ import {
 } from '../../../orders/store/orders.selectors';
 import { Order, OrderStatus } from '../../../../shared/models/order.model';
 import { OrderDialogComponent } from '../order-dialog/order-dialog.component';
+import { OrderInfoModalComponent } from '../order-info-modal/order-info-modal.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -112,5 +113,17 @@ export class AdminDashboardComponent implements OnInit {
 
   onStatusChange(orderId: string, newStatus: OrderStatus): void {
     this.store.dispatch(updateOrderStatus({ id: orderId, status: newStatus }));
+  }
+
+  openOrderInfo(order: Order, event: Event): void {
+    // Prevent opening modal when clicking on the status select
+    if ((event.target as HTMLElement).closest('.status-select')) {
+      return;
+    }
+
+    this.dialog.open(OrderInfoModalComponent, {
+      width: '500px',
+      data: order,
+    });
   }
 }
