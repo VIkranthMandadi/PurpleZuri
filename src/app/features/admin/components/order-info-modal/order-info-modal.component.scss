@@ -1,0 +1,41 @@
+.order-info {
+  min-width: 400px;
+  padding: 8px 0;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: flex-start;
+
+  .label {
+    font-weight: 500;
+    min-width: 120px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .value {
+    flex: 1;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .notes {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.notes-row {
+  flex-direction: column;
+
+  .label {
+    margin-bottom: 8px;
+  }
+
+  .value {
+    padding: 12px;
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+  }
+}
+

@@ -1,86 +1,148 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
-import { createOrder } from '../../../orders/store/orders.actions';
-import { selectOrdersLoading, selectOrdersError } from '../../../orders/store/orders.selectors';
-import { CreateOrderRequest } from '../../../../shared/models/order.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+import { loadOrders, updateOrderStatus } from '../../../orders/store/orders.actions';
+import {
+  selectAllOrders,
+  selectOrdersLoading,
+  selectOrdersError,
+} from '../../../orders/store/orders.selectors';
+import { Order, OrderStatus } from '../../../../shared/models/order.model';
+import { OrderDialogComponent } from '../order-dialog/order-dialog.component';
+import { OrderInfoModalComponent } from '../order-info-modal/order-info-modal.component';
+import { AuthService } from '../../../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatTableModule,
+    MatDialogModule,
+    MatIconModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatToolbarModule,
+    MatChipsModule,
+    MatSelectModule,
+    MatFormFieldModule,
+  ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
 })
 export class AdminDashboardComponent implements OnInit {
-  // Form group for order creation
-  orderForm: FormGroup;
-
-  // Observable to track loading state from NgRx store
+  orders$: Observable<Order[]>;
   loading$: Observable<boolean>;
-
-  // Observable to track errors from NgRx store
   error$: Observable<string | null>;
 
-  // Local state for showing success message
-  showSuccess = false;
+  displayedColumns: string[] = ['customer_name', 'phone', 'fabric', 'status', 'created_at'];
+  statusOptions: OrderStatus[] = ['shopping', 'stitching', 'shipping', 'paid'];
 
-  constructor(private fb: FormBuilder, private store: Store) {
-    // Initialize form with validators
-    this.orderForm = this.fb.group({
-      customer_name: ['', [Validators.required, Validators.minLength(2)]],
-      phone: ['', [Validators.required, Validators.pattern(/^[\d\s\-\+\(\)]+$/)]],
-      fabric: ['', [Validators.required, Validators.minLength(2)]],
-    });
-
-    // Connect to NgRx store selectors
+  constructor(
+    private store: Store,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.orders$ = this.store.select(selectAllOrders);
     this.loading$ = this.store.select(selectOrdersLoading);
     this.error$ = this.store.select(selectOrdersError);
   }
 
   ngOnInit(): void {
-    // Watch for successful order creation
-    this.loading$
-      .pipe(
-        filter((loading) => !loading), // Only proceed when loading is false
-        take(1) // Take only the first emission after loading stops
-      )
-      .subscribe(() => {
-        // Small delay to ensure state has updated
-        setTimeout(() => {
-          if (!this.orderForm.errors) {
-            this.showSuccess = true;
-            setTimeout(() => {
-              this.showSuccess = false;
-            }, 3000);
-          }
-        }, 100);
-      });
+    // Load orders when component initializes
+    this.store.dispatch(loadOrders());
+
+    // Subscribe to error stream to show snackbar on errors
+    this.error$.subscribe((error) => {
+      if (error) {
+        this.snackBar.open(`Error: ${error}`, 'Close', {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+        });
+      }
+    });
   }
 
-  onSubmit(): void {
-    // Check if form is valid
-    if (this.orderForm.valid) {
-      // Create order request object (matching CreateOrderRequest interface)
-      const orderData: CreateOrderRequest = {
-        customer_name: this.orderForm.value.customer_name,
-        phone: this.orderForm.value.phone,
-        fabric: this.orderForm.value.fabric,
-        status: 'shopping', // Default status for new orders
-      };
+  openAddOrderDialog(): void {
+    const dialogRef = this.dialog.open(OrderDialogComponent, {
+      width: '500px',
+      data: null, // Pass null for new order
+    });
 
-      // Dispatch createOrder action to NgRx store
-      // This triggers the OrdersEffects which calls Supabase service
-      this.store.dispatch(createOrder({ order: orderData }));
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Reload orders after successful creation
+        this.store.dispatch(loadOrders());
+      }
+    });
+  }
 
-      // Reset form immediately after dispatch
-      this.orderForm.reset();
+  getStatusColor(status: OrderStatus): 'primary' | 'accent' | 'warn' | undefined {
+    switch (status) {
+      case 'shopping':
+        return 'primary';
+      case 'stitching':
+        return 'accent';
+      case 'shipping':
+        return 'warn';
+      case 'paid':
+        return undefined; // Default color
+      default:
+        return undefined;
+    }
+  }
+
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  onStatusChange(orderId: string, newStatus: OrderStatus): void {
+    this.store.dispatch(updateOrderStatus({ id: orderId, status: newStatus }));
+  }
+
+  openOrderInfo(order: Order, event: Event): void {
+    // Prevent opening modal when clicking on the status select
+    if ((event.target as HTMLElement).closest('.status-select')) {
+      return;
+    }
+
+    this.dialog.open(OrderInfoModalComponent, {
+      width: '500px',
+      data: order,
+    });
+  }
+
+  async logout(): Promise<void> {
+    const { error } = await this.authService.logout();
+    if (error) {
+      this.snackBar.open('Error logging out', 'Close', {
+        duration: 3000,
+      });
     } else {
-      // Mark all fields as touched to show validation errors
-      this.orderForm.markAllAsTouched();
+      this.router.navigate(['/']);
     }
   }
 }

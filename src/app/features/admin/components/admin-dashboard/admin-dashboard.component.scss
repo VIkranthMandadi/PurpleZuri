@@ -1,2 +1,112 @@
-// Component-specific styles (if needed)
-// Most styling is handled by Tailwind CSS classes
+.admin-dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.dashboard-content {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+}
+
+.empty-state-card {
+  margin-top: 24px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  gap: 16px;
+
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: rgba(0, 0, 0, 0.38);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.orders-table {
+  width: 100%;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 12px;
+}
+
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+// Status column - reduce right padding
+.orders-table .mat-column-status {
+  padding-right: 8px;
+  width: 140px;
+}
+
+.status-select {
+  width: 110px;
+
+  ::ng-deep {
+    .mat-mdc-form-field {
+      font-size: 10px;
+    }
+    .mat-mdc-text-field-wrapper {
+      height: 32px;
+      padding-bottom: 0;
+    }
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+    .mat-mdc-form-field-infix {
+      padding: 0;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+    }
+    .mat-mdc-select-trigger {
+      min-height: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+    }
+    .mat-mdc-select-value-text {
+      line-height: 32px;
+    }
+  }
+}

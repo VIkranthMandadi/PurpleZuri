@@ -4,7 +4,9 @@ export interface Order {
   id: string;
   customer_name: string;
   phone: string;
+  email: string;
   fabric: string;
+  notes?: string;
   status: OrderStatus;
   created_at: string;
   updated_at: string;
@@ -14,6 +16,8 @@ export interface Order {
 export interface CreateOrderRequest {
   customer_name: string;
   phone: string;
+  email: string;
   fabric: string;
+  notes?: string;
   status?: OrderStatus;
 }
