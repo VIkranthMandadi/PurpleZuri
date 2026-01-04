@@ -1,0 +1,25 @@
+<div class="home-container">
+  <div class="home-content">
+    <h1 class="title">Purple Zuri</h1>
+    <p class="subtitle">Welcome to Purple Zuri</p>
+
+    <div class="options">
+      <mat-card class="option-card" (click)="goToAdmin()">
+        <mat-card-content>
+          <mat-icon class="option-icon">admin_panel_settings</mat-icon>
+          <h2>Admin</h2>
+          <p>Access the admin dashboard to manage orders</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="option-card" (click)="goToCustomer()">
+        <mat-card-content>
+          <mat-icon class="option-icon">person</mat-icon>
+          <h2>Customer</h2>
+          <p>Track your order status</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+

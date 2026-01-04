@@ -23,6 +23,8 @@ import {
 import { Order, OrderStatus } from '../../../../shared/models/order.model';
 import { OrderDialogComponent } from '../order-dialog/order-dialog.component';
 import { OrderInfoModalComponent } from '../order-info-modal/order-info-modal.component';
+import { AuthService } from '../../../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -52,7 +54,13 @@ export class AdminDashboardComponent implements OnInit {
   displayedColumns: string[] = ['customer_name', 'phone', 'fabric', 'status', 'created_at'];
   statusOptions: OrderStatus[] = ['shopping', 'stitching', 'shipping', 'paid'];
 
-  constructor(private store: Store, private dialog: MatDialog, private snackBar: MatSnackBar) {
+  constructor(
+    private store: Store,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.orders$ = this.store.select(selectAllOrders);
     this.loading$ = this.store.select(selectOrdersLoading);
     this.error$ = this.store.select(selectOrdersError);
@@ -125,5 +133,16 @@ export class AdminDashboardComponent implements OnInit {
       width: '500px',
       data: order,
     });
+  }
+
+  async logout(): Promise<void> {
+    const { error } = await this.authService.logout();
+    if (error) {
+      this.snackBar.open('Error logging out', 'Close', {
+        duration: 3000,
+      });
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 }
