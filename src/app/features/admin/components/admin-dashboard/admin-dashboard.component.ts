@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +14,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 import { loadOrders, updateOrderStatus } from '../../../orders/store/orders.actions';
 import {
@@ -31,6 +33,7 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatCardModule,
     MatTableModule,
@@ -42,6 +45,7 @@ import { Router } from '@angular/router';
     MatChipsModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
@@ -50,8 +54,16 @@ export class AdminDashboardComponent implements OnInit {
   orders$: Observable<Order[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
+  searchTerm = '';
 
-  displayedColumns: string[] = ['customer_name', 'phone', 'fabric', 'status', 'created_at'];
+  displayedColumns: string[] = [
+    'order_number',
+    'customer_name',
+    'phone',
+    'fabric',
+    'status',
+    'created_at',
+  ];
   statusOptions: OrderStatus[] = ['shopping', 'stitching', 'shipping', 'paid'];
 
   constructor(
@@ -144,5 +156,22 @@ export class AdminDashboardComponent implements OnInit {
     } else {
       this.router.navigate(['/']);
     }
+  }
+
+  filterOrders(orders: Order[]): Order[] {
+    if (!this.searchTerm) return orders;
+
+    const term = this.searchTerm.trim();
+    const isNumberOnly = /^\d+$/.test(term);
+
+    return orders.filter((order) => {
+      if (isNumberOnly) {
+        // Pure number: search only by order number (exact match)
+        return order.order_number?.toString() === term;
+      } else {
+        // Contains letters: search only by customer name
+        return order.customer_name.toLowerCase().includes(term.toLowerCase());
+      }
+    });
   }
 }
