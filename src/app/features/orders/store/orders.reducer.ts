@@ -114,5 +114,33 @@ export const ordersReducer = createReducer(
       loading: false,
       error,
     })
+  ),
+
+  // Update Order
+  on(
+    OrdersActions.updateOrder,
+    (state): OrdersState => ({
+      ...state,
+      loading: true,
+      error: null,
+    })
+  ),
+  on(
+    OrdersActions.updateOrderSuccess,
+    (state, { order }): OrdersState => ({
+      ...state,
+      orders: state.orders.map((o) => (o.id === order.id ? order : o)),
+      selectedOrder: state.selectedOrder?.id === order.id ? order : state.selectedOrder,
+      loading: false,
+      error: null,
+    })
+  ),
+  on(
+    OrdersActions.updateOrderFailure,
+    (state, { error }): OrdersState => ({
+      ...state,
+      loading: false,
+      error,
+    })
   )
 );

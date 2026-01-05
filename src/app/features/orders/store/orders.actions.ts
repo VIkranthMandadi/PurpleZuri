@@ -50,3 +50,17 @@ export const updateOrderStatusFailure = createAction(
   '[Orders] Update Order Status Failure',
   props<{ error: string }>()
 );
+
+// Update Order
+export const updateOrder = createAction(
+  '[Orders] Update Order',
+  props<{ id: string; order: Partial<CreateOrderRequest> }>()
+);
+export const updateOrderSuccess = createAction(
+  '[Orders] Update Order Success',
+  props<{ order: Order }>()
+);
+export const updateOrderFailure = createAction(
+  '[Orders] Update Order Failure',
+  props<{ error: string }>()
+);

@@ -35,13 +35,68 @@
       </mat-card-content>
     </mat-card>
     } @else {
+    <!-- Summary Cards -->
+    @if ((orders$ | async); as orders) {
+    <div class="summary-cards">
+      <mat-card class="summary-card" (click)="setStatusFilter(null)">
+        <mat-card-content>
+          <div class="summary-value">{{ getTotalCount(orders) }}</div>
+          <div class="summary-label">Total Orders</div>
+        </mat-card-content>
+      </mat-card>
+      @for (status of statusOptions; track status) {
+      <mat-card
+        class="summary-card"
+        [class.active]="selectedStatus === status"
+        (click)="setStatusFilter(status)"
+      >
+        <mat-card-content>
+          <div class="summary-value">{{ getStatusCount(orders, status) }}</div>
+          <div class="summary-label">{{ status | titlecase }}</div>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+    }
+
     <!-- Orders Table -->
     <mat-card>
       <mat-card-header>
         <mat-card-title>All Orders</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <table mat-table [dataSource]="orders" class="orders-table">
+        <div class="filters-container">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search</mat-label>
+            <input matInput [(ngModel)]="searchTerm" placeholder="Order # or name" />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+          <div class="status-filters">
+            <button
+              mat-stroked-button
+              [class.active]="selectedStatus === null"
+              (click)="setStatusFilter(null)"
+            >
+              All
+            </button>
+            @for (status of statusOptions; track status) {
+            <button
+              mat-stroked-button
+              [class.active]="selectedStatus === status"
+              (click)="setStatusFilter(status)"
+            >
+              {{ status | titlecase }}
+            </button>
+            }
+          </div>
+        </div>
+        <table mat-table [dataSource]="filterOrders(orders)" class="orders-table">
+          <!-- Order Number Column -->
+          <ng-container matColumnDef="order_number">
+            <th mat-header-cell *matHeaderCellDef>Order #</th>
+            <td mat-cell *matCellDef="let order">{{ order.order_number || '-' }}</td>
+          </ng-container>
+
           <!-- Customer Name Column -->
           <ng-container matColumnDef="customer_name">
             <th mat-header-cell *matHeaderCellDef>Customer Name</th>
@@ -81,6 +136,16 @@
           <ng-container matColumnDef="created_at">
             <th mat-header-cell *matHeaderCellDef>Created</th>
             <td mat-cell *matCellDef="let order">{{ formatDate(order.created_at) }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let order">
+              <button mat-icon-button (click)="openEditDialog(order, $event)" title="Edit Order">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

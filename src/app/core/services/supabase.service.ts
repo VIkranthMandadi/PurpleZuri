@@ -18,7 +18,7 @@ export class SupabaseService {
     const { data, error } = await this.supabase
       .from('orders')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('order_number', { ascending: true });
 
     if (error) throw error;
     return data as Order[];
@@ -39,7 +39,6 @@ export class SupabaseService {
       .select('*')
       .eq('order_number', orderNumber)
       .maybeSingle();
-
 
     if (error) {
       // Handle case where column doesn't exist or other errors
@@ -76,6 +75,19 @@ export class SupabaseService {
     const { data, error } = await this.supabase
       .from('orders')
       .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Order;
+  }
+
+  // Update order
+  async updateOrder(id: string, order: Partial<CreateOrderRequest>): Promise<Order> {
+    const { data, error } = await this.supabase
+      .from('orders')
+      .update(order)
       .eq('id', id)
       .select()
       .single();

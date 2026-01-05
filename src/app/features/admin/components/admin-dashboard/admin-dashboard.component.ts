@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +14,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 import { loadOrders, updateOrderStatus } from '../../../orders/store/orders.actions';
 import {
@@ -31,6 +33,7 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatCardModule,
     MatTableModule,
@@ -42,6 +45,7 @@ import { Router } from '@angular/router';
     MatChipsModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
@@ -50,8 +54,18 @@ export class AdminDashboardComponent implements OnInit {
   orders$: Observable<Order[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
+  searchTerm = '';
+  selectedStatus: OrderStatus | null = null;
 
-  displayedColumns: string[] = ['customer_name', 'phone', 'fabric', 'status', 'created_at'];
+  displayedColumns: string[] = [
+    'order_number',
+    'customer_name',
+    'phone',
+    'fabric',
+    'status',
+    'created_at',
+    'actions',
+  ];
   statusOptions: OrderStatus[] = ['shopping', 'stitching', 'shipping', 'paid'];
 
   constructor(
@@ -91,6 +105,21 @@ export class AdminDashboardComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // Reload orders after successful creation
+        this.store.dispatch(loadOrders());
+      }
+    });
+  }
+
+  openEditDialog(order: Order, event: Event): void {
+    event.stopPropagation(); // Prevent row click
+    const dialogRef = this.dialog.open(OrderDialogComponent, {
+      width: '500px',
+      data: order, // Pass order for edit mode
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Reload orders after successful update
         this.store.dispatch(loadOrders());
       }
     });
@@ -144,5 +173,42 @@ export class AdminDashboardComponent implements OnInit {
     } else {
       this.router.navigate(['/']);
     }
+  }
+
+  filterOrders(orders: Order[]): Order[] {
+    let filtered = orders;
+
+    // Filter by status
+    if (this.selectedStatus) {
+      filtered = filtered.filter((order) => order.status === this.selectedStatus);
+    }
+
+    // Filter by search term
+    if (this.searchTerm) {
+      const term = this.searchTerm.trim();
+      const isNumberOnly = /^\d+$/.test(term);
+
+      filtered = filtered.filter((order) => {
+        if (isNumberOnly) {
+          return order.order_number?.toString() === term;
+        } else {
+          return order.customer_name.toLowerCase().includes(term.toLowerCase());
+        }
+      });
+    }
+
+    return filtered;
+  }
+
+  setStatusFilter(status: OrderStatus | null): void {
+    this.selectedStatus = status;
+  }
+
+  getStatusCount(orders: Order[], status: OrderStatus): number {
+    return orders.filter((order) => order.status === status).length;
+  }
+
+  getTotalCount(orders: Order[]): number {
+    return orders.length;
   }
 }

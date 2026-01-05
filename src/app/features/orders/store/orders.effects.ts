@@ -69,4 +69,17 @@ export class OrdersEffects {
       )
     )
   );
+
+  // Update order
+  updateOrder$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(OrdersActions.updateOrder),
+      switchMap(({ id, order }) =>
+        from(this.supabaseService.updateOrder(id, order)).pipe(
+          map((updatedOrder) => OrdersActions.updateOrderSuccess({ order: updatedOrder })),
+          catchError((error) => of(OrdersActions.updateOrderFailure({ error: error.message })))
+        )
+      )
+    )
+  );
 }
