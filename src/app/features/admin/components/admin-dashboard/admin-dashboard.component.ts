@@ -64,6 +64,7 @@ export class AdminDashboardComponent implements OnInit {
     'fabric',
     'status',
     'created_at',
+    'actions',
   ];
   statusOptions: OrderStatus[] = ['shopping', 'stitching', 'shipping', 'paid'];
 
@@ -104,6 +105,21 @@ export class AdminDashboardComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // Reload orders after successful creation
+        this.store.dispatch(loadOrders());
+      }
+    });
+  }
+
+  openEditDialog(order: Order, event: Event): void {
+    event.stopPropagation(); // Prevent row click
+    const dialogRef = this.dialog.open(OrderDialogComponent, {
+      width: '500px',
+      data: order, // Pass order for edit mode
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Reload orders after successful update
         this.store.dispatch(loadOrders());
       }
     });

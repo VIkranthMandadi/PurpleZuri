@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Create New Order</h2>
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit Order' : 'Create New Order' }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="orderForm" class="order-form">

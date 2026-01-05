@@ -82,4 +82,17 @@ export class SupabaseService {
     if (error) throw error;
     return data as Order;
   }
+
+  // Update order
+  async updateOrder(id: string, order: Partial<CreateOrderRequest>): Promise<Order> {
+    const { data, error } = await this.supabase
+      .from('orders')
+      .update(order)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Order;
+  }
 }

@@ -10,9 +10,9 @@ import { Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { createOrder } from '../../../orders/store/orders.actions';
+import { createOrder, updateOrder } from '../../../orders/store/orders.actions';
 import { selectOrdersLoading } from '../../../orders/store/orders.selectors';
-import { CreateOrderRequest } from '../../../../shared/models/order.model';
+import { CreateOrderRequest, Order } from '../../../../shared/models/order.model';
 
 @Component({
   selector: 'app-order-dialog',
@@ -33,19 +33,24 @@ export class OrderDialogComponent implements OnInit {
   orderForm: FormGroup;
   loading$: Observable<boolean>;
   isSubmitting = false;
+  isEditMode = false;
+  orderId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private store: Store,
     private dialogRef: MatDialogRef<OrderDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: Order | null
   ) {
+    this.isEditMode = !!data;
+    this.orderId = data?.id || null;
+
     this.orderForm = this.fb.group({
-      customer_name: ['', [Validators.required, Validators.minLength(2)]],
-      phone: ['', [Validators.required, Validators.pattern(/^[\d\s\-\+\(\)]+$/)]],
-      email: ['', [Validators.required, Validators.email]],
-      fabric: ['', [Validators.required, Validators.minLength(2)]],
-      notes: [''], // Optional field
+      customer_name: [data?.customer_name || '', [Validators.required, Validators.minLength(2)]],
+      phone: [data?.phone || '', [Validators.required, Validators.pattern(/^[\d\s\-\+\(\)]+$/)]],
+      email: [data?.email || '', [Validators.required, Validators.email]],
+      fabric: [data?.fabric || '', [Validators.required, Validators.minLength(2)]],
+      notes: [data?.notes || ''], // Optional field
     });
 
     this.loading$ = this.store.select(selectOrdersLoading);
@@ -66,17 +71,26 @@ export class OrderDialogComponent implements OnInit {
 
   onSave(): void {
     if (this.orderForm.valid) {
+      if (!confirm('Are you sure you want to save these changes?')) {
+        return;
+      }
+
       this.isSubmitting = true;
-      const orderData: CreateOrderRequest = {
+      const orderData: Partial<CreateOrderRequest> = {
         customer_name: this.orderForm.value.customer_name,
         phone: this.orderForm.value.phone,
         email: this.orderForm.value.email,
         fabric: this.orderForm.value.fabric,
         notes: this.orderForm.value.notes || undefined,
-        status: 'shopping',
       };
 
-      this.store.dispatch(createOrder({ order: orderData }));
+      if (this.isEditMode && this.orderId) {
+        this.store.dispatch(updateOrder({ id: this.orderId, order: orderData }));
+      } else {
+        this.store.dispatch(
+          createOrder({ order: { ...orderData, status: 'shopping' } as CreateOrderRequest })
+        );
+      }
     } else {
       this.orderForm.markAllAsTouched();
     }
