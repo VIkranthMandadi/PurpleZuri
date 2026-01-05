@@ -87,10 +87,8 @@ export class CustomerTrackingComponent {
 
     if (this.searchType === 'orderNumber') {
       const rawValue = this.searchForm.value.orderNumber;
-      console.log('Raw form value:', rawValue, 'Type:', typeof rawValue);
       
       const orderNumber = typeof rawValue === 'string' ? parseInt(rawValue, 10) : Number(rawValue);
-      console.log('Converted order number:', orderNumber, 'Type:', typeof orderNumber);
       
       if (!orderNumber || orderNumber <= 0 || isNaN(orderNumber)) {
         this.error = 'Please enter a valid order number';
@@ -114,25 +112,19 @@ export class CustomerTrackingComponent {
     this.error = null;
     
     try {
-      console.log('Calling supabaseService.getOrderByOrderNumber...');
       const order = await this.supabaseService.getOrderByOrderNumber(orderNumber);
-      console.log('Received order:', order);
       
       if (order) {
         this.order = order;
         this.error = null;
-        console.log('Order found and set:', this.order);
       } else {
-        console.log('Order not found (null returned)');
         this.error = 'Order not found. Please check your order number.';
         this.order = null;
       }
     } catch (error: any) {
-      console.error('Search error caught:', error);
       this.error = error?.message || error?.toString() || 'Error searching for order. Please try again.';
       this.order = null;
     } finally {
-      console.log('Setting isLoading to false');
       this.isLoading = false;
       this.changeDetectorRef.detectChanges();
     }

@@ -34,23 +34,18 @@ export class SupabaseService {
 
   // Get order by order number (for customer tracking)
   async getOrderByOrderNumber(orderNumber: number): Promise<Order | null> {
-    console.log('Searching for order number:', orderNumber, 'Type:', typeof orderNumber);
-
     const { data, error } = await this.supabase
       .from('orders')
       .select('*')
       .eq('order_number', orderNumber)
       .maybeSingle();
 
-    console.log('Query result:', { data, error });
 
     if (error) {
       // Handle case where column doesn't exist or other errors
-      console.error('Error fetching order by number:', error);
       throw error;
     }
 
-    console.log('Returning order:', data);
     return data as Order | null;
   }
 
