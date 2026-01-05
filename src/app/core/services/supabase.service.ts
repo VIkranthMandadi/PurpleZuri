@@ -32,6 +32,42 @@ export class SupabaseService {
     return data as Order;
   }
 
+  // Get order by order number (for customer tracking)
+  async getOrderByOrderNumber(orderNumber: number): Promise<Order | null> {
+    console.log('Searching for order number:', orderNumber, 'Type:', typeof orderNumber);
+
+    const { data, error } = await this.supabase
+      .from('orders')
+      .select('*')
+      .eq('order_number', orderNumber)
+      .maybeSingle();
+
+    console.log('Query result:', { data, error });
+
+    if (error) {
+      // Handle case where column doesn't exist or other errors
+      console.error('Error fetching order by number:', error);
+      throw error;
+    }
+
+    console.log('Returning order:', data);
+    return data as Order | null;
+  }
+
+  // Get order by phone number (for customer tracking)
+  async getOrderByPhone(phone: string): Promise<Order | null> {
+    const { data, error } = await this.supabase
+      .from('orders')
+      .select('*')
+      .eq('phone', phone)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data as Order;
+  }
+
   // Create new order
   async createOrder(order: CreateOrderRequest): Promise<Order> {
     const { data, error } = await this.supabase.from('orders').insert([order]).select().single();

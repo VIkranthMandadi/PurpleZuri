@@ -2,6 +2,7 @@ export type OrderStatus = 'shopping' | 'stitching' | 'shipping' | 'paid';
 
 export interface Order {
   id: string;
+  order_number?: number;
   customer_name: string;
   phone: string;
   email: string;
