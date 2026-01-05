@@ -56,9 +56,25 @@
   }
 }
 
+.filters-container {
+  margin-bottom: 16px;
+}
+
 .search-field {
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+}
+
+.status-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  button {
+    &.active {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+  }
 }
 
 .orders-table {

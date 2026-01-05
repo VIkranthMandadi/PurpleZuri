@@ -41,11 +41,31 @@
         <mat-card-title>All Orders</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Search</mat-label>
-          <input matInput [(ngModel)]="searchTerm" placeholder="Order #, name, or phone" />
-          <mat-icon matPrefix>search</mat-icon>
-        </mat-form-field>
+        <div class="filters-container">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search</mat-label>
+            <input matInput [(ngModel)]="searchTerm" placeholder="Order # or name" />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+          <div class="status-filters">
+            <button
+              mat-stroked-button
+              [class.active]="selectedStatus === null"
+              (click)="setStatusFilter(null)"
+            >
+              All
+            </button>
+            @for (status of statusOptions; track status) {
+            <button
+              mat-stroked-button
+              [class.active]="selectedStatus === status"
+              (click)="setStatusFilter(status)"
+            >
+              {{ status | titlecase }}
+            </button>
+            }
+          </div>
+        </div>
         <table mat-table [dataSource]="filterOrders(orders)" class="orders-table">
           <!-- Order Number Column -->
           <ng-container matColumnDef="order_number">

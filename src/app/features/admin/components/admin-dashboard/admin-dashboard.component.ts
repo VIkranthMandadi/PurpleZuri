@@ -55,6 +55,7 @@ export class AdminDashboardComponent implements OnInit {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
   searchTerm = '';
+  selectedStatus: OrderStatus | null = null;
 
   displayedColumns: string[] = [
     'order_number',
@@ -159,19 +160,31 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   filterOrders(orders: Order[]): Order[] {
-    if (!this.searchTerm) return orders;
+    let filtered = orders;
 
-    const term = this.searchTerm.trim();
-    const isNumberOnly = /^\d+$/.test(term);
+    // Filter by status
+    if (this.selectedStatus) {
+      filtered = filtered.filter((order) => order.status === this.selectedStatus);
+    }
 
-    return orders.filter((order) => {
-      if (isNumberOnly) {
-        // Pure number: search only by order number (exact match)
-        return order.order_number?.toString() === term;
-      } else {
-        // Contains letters: search only by customer name
-        return order.customer_name.toLowerCase().includes(term.toLowerCase());
-      }
-    });
+    // Filter by search term
+    if (this.searchTerm) {
+      const term = this.searchTerm.trim();
+      const isNumberOnly = /^\d+$/.test(term);
+
+      filtered = filtered.filter((order) => {
+        if (isNumberOnly) {
+          return order.order_number?.toString() === term;
+        } else {
+          return order.customer_name.toLowerCase().includes(term.toLowerCase());
+        }
+      });
+    }
+
+    return filtered;
+  }
+
+  setStatusFilter(status: OrderStatus | null): void {
+    this.selectedStatus = status;
   }
 }
