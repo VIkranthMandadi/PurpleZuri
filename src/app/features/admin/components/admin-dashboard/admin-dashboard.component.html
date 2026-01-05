@@ -35,6 +35,30 @@
       </mat-card-content>
     </mat-card>
     } @else {
+    <!-- Summary Cards -->
+    @if ((orders$ | async); as orders) {
+    <div class="summary-cards">
+      <mat-card class="summary-card" (click)="setStatusFilter(null)">
+        <mat-card-content>
+          <div class="summary-value">{{ getTotalCount(orders) }}</div>
+          <div class="summary-label">Total Orders</div>
+        </mat-card-content>
+      </mat-card>
+      @for (status of statusOptions; track status) {
+      <mat-card
+        class="summary-card"
+        [class.active]="selectedStatus === status"
+        (click)="setStatusFilter(status)"
+      >
+        <mat-card-content>
+          <div class="summary-value">{{ getStatusCount(orders, status) }}</div>
+          <div class="summary-label">{{ status | titlecase }}</div>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+    }
+
     <!-- Orders Table -->
     <mat-card>
       <mat-card-header>

@@ -187,4 +187,12 @@ export class AdminDashboardComponent implements OnInit {
   setStatusFilter(status: OrderStatus | null): void {
     this.selectedStatus = status;
   }
+
+  getStatusCount(orders: Order[], status: OrderStatus): number {
+    return orders.filter((order) => order.status === status).length;
+  }
+
+  getTotalCount(orders: Order[]): number {
+    return orders.length;
+  }
 }
